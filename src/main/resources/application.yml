@@ -1,0 +1,49 @@
+spring:
+  redis:
+    host: 15.164.22.241
+    port: 6379
+  session:
+    timeout: 600
+    store-type: redis
+    redis:
+      flush-mode: on-save
+      namespace: spring:session
+#  profiles:
+#    active: alpha
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: false
+    add-properties: false
+  freemarker:
+    cache: false
+  jwt:
+    header: Authorization
+    secret: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
+    token-validity-in-seconds: 86400
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://15.164.22.241:3306/chattingdatabase?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: juy69948820@
+
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: create-drop
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      use-new-id-generator-mappings: false
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+        defer-datasource-initialization: true
+      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+  sql.init.mode: always
+  logging:
+    level:
+      org.hibernate.SQL: debug

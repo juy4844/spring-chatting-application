@@ -1,0 +1,6 @@
+spring:
+  profiles:
+    active: local
+  redis:
+    host: 15.164.22.241
+    port: 6379
