@@ -1,27 +1,35 @@
 package com.websocket.chat.controller;
 
+import com.websocket.chat.dto.ChatRoomDto;
+import com.websocket.chat.model.ChatJoin;
 import com.websocket.chat.model.ChatRoom;
 import com.websocket.chat.model.LoginInfo;
+import com.websocket.chat.model.User;
+import com.websocket.chat.repo.ChatJoinRepository;
 import com.websocket.chat.repo.ChatRoomRepository;
+import com.websocket.chat.repo.RedisRepository;
+import com.websocket.chat.repo.UserRepository;
+import com.websocket.chat.service.ChatRoomService;
 import com.websocket.chat.service.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/chat")
 public class ChatRoomController {
 
+    private final RedisRepository redisRepository;
+    private final ChatRoomService chatRoomService;
     private final ChatRoomRepository chatRoomRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -32,16 +40,28 @@ public class ChatRoomController {
 
     @GetMapping("/rooms")
     @ResponseBody
-    public List<ChatRoom> room() {
-        List<ChatRoom> chatRooms = chatRoomRepository.findAllRoom();
-        chatRooms.stream().forEach(room -> room.setUserCount(chatRoomRepository.getUserCount(room.getRoomId())));
-        return chatRooms;
+    public List<ChatRoomDto> room() {
+        List<ChatRoom> chatRooms = chatRoomRepository.findAll();
+        List<ChatRoomDto> chatRoomDtos = chatRooms.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        return chatRoomDtos;
+    }
+
+    private ChatRoomDto convertToDto(ChatRoom chatRoom) {
+        ChatRoomDto chatRoomDto = new ChatRoomDto();
+        chatRoomDto.setRoomId("CHAT_ROOM_" + chatRoom.getRoomId());
+        chatRoomDto.setName(chatRoom.getRoomName());
+        chatRoomDto.setUserCount(chatRoom.getUserCount());
+        return chatRoomDto;
     }
 
     @PostMapping("/room")
     @ResponseBody
-    public ChatRoom createRoom(@RequestParam String name) {
-        return chatRoomRepository.createChatRoom(name);
+    public ChatRoomDto createRoom(@RequestParam String name) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        return chatRoomService.createChatRoom(name, username);
     }
 
     @GetMapping("/room/enter/{roomId}")
@@ -52,8 +72,14 @@ public class ChatRoomController {
 
     @GetMapping("/room/{roomId}")
     @ResponseBody
-    public ChatRoom roomInfo(@PathVariable String roomId) {
-        return chatRoomRepository.findRoomById(roomId);
+    public ChatRoomDto roomInfo(@PathVariable String roomId) {
+        String[] parts = roomId.split("_");
+        Long Id = Long.parseLong(parts[2]);
+        ChatRoom chatRoom = chatRoomService.findOne(Id);
+        ChatRoomDto chatRoomDto = new ChatRoomDto();
+        chatRoomDto.setRoomId(roomId);
+        chatRoomDto.setName(chatRoom.getRoomName());
+        return chatRoomDto;
     }
 
     @GetMapping("/user")

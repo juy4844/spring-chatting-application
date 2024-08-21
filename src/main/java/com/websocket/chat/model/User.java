@@ -17,7 +17,8 @@ public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @Column(name = "chatroom_id")
+    private Long id;
 
     @Column(nullable = false, length = 30, unique = true)
     private String username;

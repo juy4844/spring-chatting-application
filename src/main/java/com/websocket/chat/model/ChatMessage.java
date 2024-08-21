@@ -5,32 +5,34 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import javax.persistence.*;
 import java.sql.Timestamp;
+
+import static javax.persistence.FetchType.LAZY;
 
 @Getter
 @Setter
+@Entity
 public class ChatMessage {
 
     public ChatMessage() {
     }
 
     @Builder
-    public ChatMessage(MessageType type, String roomId, String sender, String message, long userCount) {
-        this.type = type;
-        this.roomId = roomId;
-        this.sender = sender;
+    public ChatMessage(String message, long userCount) {
         this.message = message;
         this.userCount = userCount;
     }
 
-    // 메시지 타입 : 입장, 퇴장, 채팅
-    public enum MessageType {
-        ENTER, QUIT, TALK
-    }
+    @Id
+    @GeneratedValue
+    @Column(name = "message_id")
+    private Long id;
 
-    private MessageType type; // 메시지 타입
-    private String roomId; // 방번호
-    private String sender; // 메시지 보낸사람
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "chat_join_id")
+    private ChatJoin chatJoin;
+
     private String message; // 메시지
     @CreationTimestamp
     private Timestamp createDate;

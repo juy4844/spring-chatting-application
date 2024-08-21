@@ -2,10 +2,8 @@ package com.websocket.chat.service;
 
 import com.websocket.chat.model.PrincipalDetail;
 import com.websocket.chat.model.User;
-import com.websocket.chat.repo.ChatRoomRepository;
 import com.websocket.chat.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

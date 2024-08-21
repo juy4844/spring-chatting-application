@@ -21,7 +21,7 @@ public class ChatRoom implements Serializable {
     @Id
     @GeneratedValue
     @Column(name = "chatroom_id")
-    private String roomId;
+    private Long roomId;
 
     private String roomName;
     @CreationTimestamp
@@ -30,12 +30,11 @@ public class ChatRoom implements Serializable {
     private long userCount; // 채팅방 인원수
 
     @JsonIgnore
-    @OneToMany(mappedBy = "chatroom", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
     private List<ChatJoin> chatJoins = new ArrayList<>();
 
     public static ChatRoom create(String name) {
         ChatRoom chatRoom = new ChatRoom();
-        chatRoom.roomId = UUID.randomUUID().toString();
         chatRoom.roomName = name;
         return chatRoom;
     }
