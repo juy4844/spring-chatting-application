@@ -13,11 +13,12 @@ import java.util.List;
 @Entity
 @Data
 @NoArgsConstructor
+@Table(name = "User", schema = "chattingdatabase")
 public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "chatroom_id")
+    @Column(name = "user_id")
     private Long id;
 
     @Column(nullable = false, length = 30, unique = true)

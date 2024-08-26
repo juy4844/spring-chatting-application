@@ -16,6 +16,7 @@ public class UserService {
     @Transactional
     public void join(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole("ROLE_USER");
         userRepository.save(user);
     }
 }

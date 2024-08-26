@@ -15,6 +15,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@Table(name = "ChatRoom", schema = "chattingdatabase")
 public class ChatRoom implements Serializable {
 
     private static final long serialVersionUID = 6494678977089006639L;

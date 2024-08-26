@@ -1,6 +1,8 @@
 package com.websocket.chat.controller;
 
 import com.websocket.chat.dto.ChatRoomDto;
+import com.websocket.chat.dto.UserDto;
+import com.websocket.chat.jwt.JwtTokenProvider;
 import com.websocket.chat.model.ChatJoin;
 import com.websocket.chat.model.ChatRoom;
 import com.websocket.chat.model.LoginInfo;
@@ -10,7 +12,7 @@ import com.websocket.chat.repo.ChatRoomRepository;
 import com.websocket.chat.repo.RedisRepository;
 import com.websocket.chat.repo.UserRepository;
 import com.websocket.chat.service.ChatRoomService;
-import com.websocket.chat.service.JwtTokenProvider;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,21 +29,40 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/chat")
 public class ChatRoomController {
-
-    private final RedisRepository redisRepository;
     private final ChatRoomService chatRoomService;
     private final ChatRoomRepository chatRoomRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+
 
     @GetMapping("/room")
-    public String rooms() {
-        return "/chat/room";
+    public String room() {
+        return "/chat/newroom";
+    }
+
+    @GetMapping("/myroom")
+    public String myroom() {
+        return "/chat/myroom";
     }
 
     @GetMapping("/rooms")
     @ResponseBody
-    public List<ChatRoomDto> room() {
+    public List<ChatRoomDto> rooms() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+
         List<ChatRoom> chatRooms = chatRoomRepository.findAll();
+        List<ChatRoomDto> chatRoomDtos = chatRooms.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        return chatRoomDtos;
+    }
+
+    @GetMapping("/myrooms")
+    @ResponseBody
+    public List<ChatRoomDto> myrooms() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+
+        List<ChatRoom> chatRooms = chatRoomRepository.findByUser(name);
         List<ChatRoomDto> chatRoomDtos = chatRooms.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
@@ -70,6 +91,15 @@ public class ChatRoomController {
         return "/chat/roomdetail";
     }
 
+    @GetMapping("/room/join/{roomId}")
+    public String roomJoin(Model model, @PathVariable String roomId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        chatRoomService.joinChatRoom(roomId, username);
+        model.addAttribute("roomId", roomId);
+        return "/chat/roomdetail";
+    }
+
     @GetMapping("/room/{roomId}")
     @ResponseBody
     public ChatRoomDto roomInfo(@PathVariable String roomId) {
@@ -82,16 +112,20 @@ public class ChatRoomController {
         return chatRoomDto;
     }
 
-    @GetMapping("/user")
+    @GetMapping("/room/{roomId}/users")
     @ResponseBody
-    public LoginInfo getUserInfo(HttpServletRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String name = auth.getName();
-        String token = jwtTokenProvider.generateToken(name);
-        HttpSession session = request.getSession();
-        //System.out.println(token);
-        System.out.println(session.getId());
-        //String name = jwtTokenProvider.getUserNameFromJwt(token);
-        return LoginInfo.builder().name(name).token(token).build();
+    public List<UserDto> users(@PathVariable String roomId) {
+
+        List<User> users = chatRoomService.findUserByRoomId(roomId);
+        List<UserDto> userDtos = users.stream()
+                .map(user -> new UserDto(user.getId(), user.getUsername()))
+                .collect(Collectors.toList());
+        for (UserDto userDto : userDtos) {
+            System.out.println(userDto.getUsername());
+        }
+        return userDtos;
     }
+
+
+
 }

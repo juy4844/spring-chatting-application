@@ -13,6 +13,7 @@ import static javax.persistence.FetchType.LAZY;
 @Getter
 @Setter
 @Entity
+@Table(name = "ChatMessage", schema = "chattingdatabase")
 public class ChatMessage {
 
     public ChatMessage() {

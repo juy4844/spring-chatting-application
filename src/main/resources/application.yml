@@ -32,13 +32,14 @@ spring:
   jpa:
     open-in-view: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
       use-new-id-generator-mappings: false
     show-sql: true
     properties:
       hibernate:
+        default_schema: chattingdatabase
         format_sql: true
         show_sql: true
         defer-datasource-initialization: true

@@ -25,4 +25,10 @@ public class ChatRoomRepository {
                 .getResultList();
     }
 
+    public List<ChatRoom> findByUser(String username) {
+        return em.createQuery("select c from ChatRoom c join ChatJoin cj on cj.chatRoom.id = c.id join cj.user u where u.username = :username", ChatRoom.class)
+                .setParameter("username", username)
+                .getResultList();
+    }
+
 }

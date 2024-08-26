@@ -14,6 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -28,16 +30,39 @@ public class ChatRoomService {
         chatRoom.setRoomName(name);
         chatRoomRepository.save(chatRoom);
 
-        User user = userRepository.findByUsername(username).get();
-        ChatJoin chatJoin = new ChatJoin();
-        chatJoin.setUser(user);
-        chatJoin.setChatRoom(chatRoom);
-        chatJoinRepository.save(chatJoin);
+//        User user = userRepository.findByUsername(username).get();
+//        ChatJoin chatJoin = new ChatJoin();
+//        chatJoin.setUser(user);
+//        chatJoin.setChatRoom(chatRoom);
+//        chatJoinRepository.save(chatJoin);
 
         ChatRoomDto chatRoomDto = new ChatRoomDto();
         chatRoomDto.setName(name);
         chatRoomDto.setRoomId("CHAT_ROOM_" + chatRoom.getRoomId());
         return chatRoomDto;
+    }
+
+    public void joinChatRoom(String roomId, String username) {
+        User user = userRepository.findByUsername(username).get();
+        String[] parts = roomId.split("_");
+        Long id = Long.parseLong(parts[2]);
+
+        if (chatJoinRepository.findByUsernameAndRoomId(username, id).isPresent()) {
+            return;
+        }
+        ChatRoom chatRoom = chatRoomRepository.findOne(id);
+        ChatJoin chatJoin = new ChatJoin();
+        chatJoin.setUser(user);
+        chatJoin.setChatRoom(chatRoom);
+        chatJoinRepository.save(chatJoin);
+        chatRoom.setUserCount(chatRoom.getUserCount() + 1);
+        chatRoomRepository.save(chatRoom);
+    }
+
+    public List<User> findUserByRoomId(String roomId) {
+        String[] parts = roomId.split("_");
+        Long id = Long.parseLong(parts[2]);
+        return chatJoinRepository.findUserByRoomId(id);
     }
 
     public ChatRoom findOne(Long roomId) {

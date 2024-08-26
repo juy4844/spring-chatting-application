@@ -8,6 +8,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
+@Table(name = "ChatJoin", schema = "chattingdatabase")
 public class ChatJoin {
     @Id
     @GeneratedValue

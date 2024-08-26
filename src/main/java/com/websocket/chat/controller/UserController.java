@@ -1,10 +1,14 @@
 package com.websocket.chat.controller;
 
+import com.websocket.chat.jwt.JwtTokenProvider;
+import com.websocket.chat.model.LoginInfo;
 import com.websocket.chat.model.User;
 import com.websocket.chat.service.UserService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -12,6 +16,7 @@ import javax.validation.Valid;
 @Controller
 @RequiredArgsConstructor
 public class UserController {
+    private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
 
     @GetMapping("/join")
@@ -42,4 +47,13 @@ public class UserController {
 //        userService.login(loginDto);
 //        return "redirect:/chat/room";
 //    }
+
+    @GetMapping("/chat/user")
+    @ResponseBody
+    public LoginInfo getUserInfo() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        return LoginInfo.builder().name(name).token(jwtTokenProvider.generateToken(name)).build();
+    }
+
 }
